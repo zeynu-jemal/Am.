@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>EDUGENIUS — Quiz</title>
+<style>
+  :root{
+    --card-bg: #ffffff;
+    --page-bg: #f2f5f8;
+    --accent: #111;
+    --ok: #0b7a33;
+    --bad: #b30000;
+    --explain-bg: #fff8e6;
+    --muted: #6b7280;
+  }
+
+  body{
+    margin:0;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    background:var(--page-bg);
+    color: #111;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+
+  /* Container / Card */
+  .card{
+    max-width: 980px;
+    margin: 28px auto;
+    background: var(--card-bg);
+    padding: 28px;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(10,10,10,0.08);
+    box-sizing: border-box;
+  }
+
+  /* Big typography */
+  h1{ font-size:48px; margin:0 0 8px 0; letter-spacing:1px;}
+  h2{ font-size:34px; margin:8px 0 16px 0;}
+  h3{ font-size:26px; margin:6px 0 12px 0;}
+  p{ font-size:20px; line-height:1.45; margin:8px 0; color:var(--muted); }
+
+  input[type="text"], input[type="password"], select {
+    width:100%; padding:14px 12px; font-size:20px; border-radius:8px;
+    border:1px solid #d0d7de; box-sizing:border-box; margin-top:10px;
+  }
+
+  button {
+    font-size:20px; padding:12px 18px; border-radius:10px;
+    background:var(--accent); color:white; border:0; cursor:pointer;
+  }
+  button.secondary { background:#555; }
+  button.ghost { background:transparent; color:var(--accent); border:2px solid #ddd; }
+
+  .row { display:flex; gap:12px; align-items:center; }
+  .row .col { flex:1; }
+
+  /* Pages */
+  .page { display:none; }
+  .visible { display:block; }
+
+  /* Question area */
+  #questionText { font-size:30px; margin-bottom:18px; font-weight:700; }
+  .optionBtn {
+    display:block;
+    width:100%;
+    text-align:left;
+    padding:14px 16px;
+    font-size:22px;
+    border-radius:10px;
+    border:2px solid #e5e9ee;
+    background:white;
+    margin-bottom:12px;
+    cursor:pointer;
+  }
+  .optionBtn:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(0,0,0,0.06); }
+
+  .correctBox { border:4px solid var(--ok); padding:14px; border-radius:10px; background:#f1fff2; font-size:22px; }
+  .incorrectBox { border:4px solid var(--bad); padding:14px; border-radius:10px; background:#fff3f3; font-size:22px; }
+
+  .explanation {
+    margin-top:12px;
+    background: var(--explain-bg);
+    padding:16px;
+    border-left:6px solid orange;
+    border-radius:8px;
+    font-size:20px;
+  }
+
+  #timerRow { display:flex; justify-content:space-between; gap:12px; align-items:center; margin-bottom:14px; }
+  .timerBox { font-weight:700; font-size:20px; color:#b02a2a; }
+
+  /* Leaderboard table */
+  table { width:100%; border-collapse:collapse; margin-top:12px; font-size:20px; }
+  th, td { text-align:left; padding:10px; border-bottom:1px solid #eee; }
+  th { font-weight:700; }
+
+  .settings-row { display:flex; gap:12px; align-items:center; margin-top:12px; flex-wrap:wrap; }
+  .chip { padding:8px 12px; border-radius:999px; background:#f3f4f6; font-size:16px; cursor:pointer; border:1px solid #e5e7eb; }
+
+  /* Confetti canvas overlay */
+  #confettiCanvas {
+    position: fixed;
+    left: 0; top: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 9999;
+  }
+
+  @media (max-width:700px){
+    .card{ padding:16px; margin:12px; }
+    h1{ font-size:36px;} h2{font-size:26px;} h3{font-size:20px;}
+    .optionBtn { font-size:18px; padding:12px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="confettiCanvas"></canvas>
+
+<div class="card">
+
+  <!-- AUTH PAGE -->
+  <div id="authPage" class="page visible">
+    <h1>EDUGENIUS</h1>
+    <p>Welcome — log in or create an account. Your data (fake backend) is stored locally and can be exported/imported via JSON.</p>
+
+    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+      <div style="flex:1; min-width:240px;">
+        <h3>Login</h3>
+        <input id="loginUser" placeholder="Username" />
+        <input id="loginPass" type="password" placeholder="Password" />
+        <div style="margin-top:12px; display:flex; gap:8px;">
+          <button onclick="doLogin()">Login</button>
+          <button class="secondary" onclick="showRegister()">Create account</button>
+        </div>
+      </div>
+
+      <div style="flex:1; min-width:240px;">
+        <h3>Manage DB</h3>
+        <p>Export or import your local EDUGENIUS DB (users & scores).</p>
+        <div style="display:flex; gap:8px; margin-top:8px;">
+          <button onclick="exportDB()">Export DB</button>
+          <label class="ghost" style="display:inline-block; padding:10px; cursor:pointer;">
+            Import
+            <input id="importFile" type="file" accept="application/json" style="display:none" onchange="importDB(event)" />
+          </label>
+        </div>
+        <p style="margin-top:10px;">Demo accounts: <strong>admin/1234</strong>, <strong>shuka/pass</strong></p>
+      </div>
+    </div>
+
+    <hr style="margin:18px 0; border:none; border-top:1px solid #f0f0f0;" />
+
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="ghost" onclick="openLeaderboard()">View Leaderboard</button>
+      <button class="secondary" onclick="seedSampleData()">Seed Sample Scores</button>
+    </div>
+  </div>
+
+  <!-- REGISTER -->
+  <div id="registerPage" class="page">
+    <h2>Create Account</h2>
+    <input id="regUser" placeholder="Username" />
+    <input id="regPass" placeholder="Password" />
+    <div style="margin-top:12px;">
+      <button onclick="doRegister()">Register</button>
+      <button class="secondary" onclick="backToAuth()">Back</button>
+    </div>
+  </div>
+
+  <!-- SETUP PAGE -->
+  <div id="setupPage" class="page">
+    <h2>Quiz Settings</h2>
+    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+      <div style="flex:1; min-width:220px;">
+        <label style="font-size:18px">Subject</label>
+        <select id="subjectSelect" style="margin-top:8px;">
+          <option>English</option>
+          <option>Science</option>
+          <option>Math</option>
+        </select>
+      </div>
+
+      <div style="flex:1; min-width:220px;">
+        <label style="font-size:18px">Level</label>
+        <select id="levelSelect" style="margin-top:8px;">
+          <option>Easy</option>
+          <option>Hard</option>
+        </select>
+      </div>
+
+      <div style="flex:1; min-width:220px;">
+        <label style="font-size:18px">Mode</label>
+        <div style="margin-top:8px;">
+          <label class="chip"><input id="mixedMode" type="checkbox" /> Mixed subjects (randomized)</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-row">
+      <label class="chip"><input id="audioToggle" type="checkbox" /> Read explanations aloud</label>
+      <label class="chip"><input id="perQuestionExplain" type="checkbox" checked /> Show explanation even when correct</label>
+      <label class="chip"><input id="confettiToggle" type="checkbox" checked /> Confetti on high score (≥20)</label>
+      <label class="chip"><input id="randomizeOptions" type="checkbox" checked /> Randomize option order</label>
+    </div>
+
+    <div style="margin-top:18px;">
+      <button onclick="beginQuiz()">Start Quiz (25 q)</button>
+      <button class="secondary" onclick="logout()">Log out</button>
+      <button class="ghost" onclick="openLeaderboard()">Leaderboard</button>
+    </div>
+  </div>
+
+  <!-- QUIZ PAGE -->
+  <div id="quizPage" class="page">
+    <div id="timerRow">
+      <div class="timerBox">Question: <span id="qTimer">30</span>s</div>
+      <div class="timerBox">Total: <span id="totalTimer">10:00</span></div>
+      <div style="text-align:right; font-size:18px;">Question <span id="qIndex">1</span>/25</div>
+    </div>
+
+    <div id="questionText">Question text</div>
+
+    <div id="optionsContainer" style="margin-top:12px;"></div>
+
+    <div style="margin-top:12px; display:flex; gap:10px;">
+      <button onclick="handleNext()">Next</button>
+      <button class="secondary" onclick="finishEarly()">Finish Quiz</button>
+      <button class="ghost" onclick="toggleAudioPreview()">🔊 Play explanation</button>
+    </div>
+
+    <div id="feedbackArea" style="margin-top:16px;"></div>
+  </div>
+
+  <!-- FINAL PAGE -->
+  <div id="finalPage" class="page">
+    <div style="font-size:40px; text-align:center; color:var(--bad); font-weight:800; border:3px solid var(--bad); padding:16px; border-radius:10px; margin-bottom:16px;">CongratulationS</div>
+
+    <div style="text-align:center; margin-bottom:12px;">
+      <div id="finalScore" style="font-size:34px; font-weight:700;">You scored ? / 25</div>
+      <p style="font-size:18px; color:var(--muted)">If anything is wrong, export the DB and send it with timestamp.</p>
+    </div>
+
+    <div style="display:flex; gap:10px; justify-content:center; margin-top:8px;">
+      <button onclick="openLeaderboard()">Leaderboard</button>
+      <button class="secondary" onclick="goToSetup()">Take another quiz</button>
+      <button class="ghost" onclick="logout()">Log out</button>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD PAGE -->
+  <div id="leaderboardPage" class="page">
+    <h2>Leaderboard — Top Scores</h2>
+    <table id="leaderboardTable" aria-label="Leaderboard"></table>
+    <div style="margin-top:12px;">
+      <button onclick="backToSetup()">Back</button>
+      <button class="secondary" onclick="clearLeaderboard()">Clear Leaderboard</button>
+      <button class="ghost" onclick="exportDB()">Export DB</button>
+    </div>
+  </div>
+
+</div> <!-- card -->
+
+<script>
+/* ======================
+   Single-file EDUGENIUS
+   Features: mixed quiz, per-question explanations, confetti, export/import DB, audio playback, randomized questions/options
+   ====================== */
+
+const DB_KEY = "EDUGENIUS_DB_v1";
+
+/* -------------------------
+   DB helpers
+   ------------------------- */
+function getDB(){
+  let raw = localStorage.getItem(DB_KEY);
+  if(!raw){
+    const seed = {
+      users: [{ user: "admin", pass: "1234" }, { user: "shuka", pass: "pass" }],
+      scores: []
+    };
+    localStorage.setItem(DB_KEY, JSON.stringify(seed));
+    return seed;
+  }
+  try { return JSON.parse(raw); } catch(e){ return { users: [], scores: [] }; }
+}
+function saveDB(db){ localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+
+/* export & import */
+function exportDB(){
+  const db = getDB();
+  const blob = new Blob([JSON.stringify(db, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "edugenius_db.json"; document.body.appendChild(a);
+  a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+
+function importDB(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    try{
+      const parsed = JSON.parse(ev.target.result);
+      if(parsed && typeof parsed === "object"){
+        localStorage.setItem(DB_KEY, JSON.stringify(parsed));
+        alert("DB imported successfully.");
+        // refresh UI if needed
+      } else {
+        alert("Invalid JSON.");
+      }
+    } catch(err){
+      alert("Failed to parse JSON.");
+    }
+  };
+  reader.readAsText(file);
+  // clear input so same file can be imported again later
+  e.target.value = "";
+}
+
+/* seed sample scores for demo */
+function seedSampleData(){
+  const db = getDB();
+  for(let i=0;i<8;i++){
+    db.scores.push({
+      user: "user"+(i+1),
+      score: Math.floor(Math.random()*26),
+      subject: ["English","Science","Math"][Math.floor(Math.random()*3)],
+      level: Math.random()>0.5?"Easy":"Hard",
+      timeSec: Math.floor(Math.random()*600),
+      date: new Date(Date.now() - Math.floor(Math.random()*1000000000)).toISOString()
+    });
+  }
+  saveDB(db);
+  alert("Sample scores added.");
+}
+
+/* -------------------------
+   Auth
+   ------------------------- */
+let CURRENT_USER = null;
+
+function showPage(id){
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("visible"));
+  const el = document.getElementById(id);
+  if(el) el.classList.add("visible");
+}
+
+function showRegister(){ showPage("registerPage"); }
+function backToAuth(){ showPage("authPage"); }
+
+function doRegister(){
+  const user = document.getElementById("regUser").value.trim();
+  const pass = document.getElementById("regPass").value;
+  if(!user || !pass){ alert("Enter username and password"); return; }
+  const db = getDB();
+  if(db.users.find(u=>u.user.toLowerCase()===user.toLowerCase())){ alert("Username taken"); return; }
+  db.users.push({ user, pass });
+  saveDB(db);
+  alert("Account created. You can now log in.");
+  document.getElementById("regUser").value = "";
+  document.getElementById("regPass").value = "";
+  showPage("authPage");
+}
+
+function doLogin(){
+  const user = document.getElementById("loginUser").value.trim();
+  const pass = document.getElementById("loginPass").value;
+  const db = getDB();
+  if(!user || !pass){ alert("Enter username and password"); return; }
+  const found = db.users.find(u => u.user === user && u.pass === pass);
+  if(!found){ alert("Invalid login"); return; }
+  CURRENT_USER = user;
+  document.getElementById("loginUser").value = "";
+  document.getElementById("loginPass").value = "";
+  showPage("setupPage");
+}
+
+function logout(){
+  CURRENT_USER = null;
+  showPage("authPage");
+}
+
+/* -------------------------
+   Question bank (real questions + explanations)
+   ------------------------- */
+const QUESTION_BANK = {
+  English: {
+    Easy: [
+      { q:"Which word is a noun?", options:["Run","Happiness","Quickly"], correct:"Happiness", explanation:"A noun names people, places, things or ideas. 'Happiness' is an idea, so it's a noun." },
+      { q:"Choose the correct sentence:", options:["She don't like coffee.","She doesn't like coffee.","She not like coffee."], correct:"She doesn't like coffee.", explanation:"For third-person singular (he/she/it) we use 'doesn't' in negative present simple." },
+      { q:"Which is the comparative form of 'good'?", options:["gooder","better","more good"], correct:"better", explanation:"'Better' is the irregular comparative form of 'good'." },
+      { q:"What is a synonym of 'helpful'?", options:["useful","useless","quiet"], correct:"useful", explanation:"'Useful' and 'helpful' have similar meanings — they both indicate usefulness." }
+    ],
+    Hard: [
+      { q:"Identify the passive voice sentence:", options:["The chef cooks the meal.","The meal was cooked by the chef.","The chef is cooking."], correct:"The meal was cooked by the chef.", explanation:"Passive voice focuses on the action receiver: 'the meal' receives the action; structure uses 'to be' + past participle." },
+      { q:"What is a subordinate clause?", options:["A clause that can stand alone.","A clause that depends on another clause.","A clause without a verb."], correct:"A clause that depends on another clause.", explanation:"A subordinate clause (dependent) cannot stand alone and provides additional info (e.g., 'because he arrived late')." },
+      { q:"Choose the correct punctuation: She said ___ I'll be there soon.", options:['","', "':'", '"—"'], correct:'","', explanation:"Use a comma to introduce direct speech: She said, 'I'll be there soon.'" }
+    ]
+  },
+  Science: {
+    Easy: [
+      { q:"What gas do living animals exhale?", options:["Oxygen","Carbon dioxide","Nitrogen"], correct:"Carbon dioxide", explanation:"Animals use oxygen for respiration and exhale carbon dioxide as a waste product." },
+      { q:"Which organ pumps blood around the body?", options:["Lung","Liver","Heart"], correct:"Heart", explanation:"The heart is a muscular pump that circulates blood through the body." },
+      { q:"What do plants use to make food in photosynthesis?", options:["Sunlight","Soil","Wind"], correct:"Sunlight", explanation:"Photosynthesis requires sunlight, water and CO2 to make glucose and oxygen." }
+    ],
+    Hard: [
+      { q:"Where in the cell is most ATP produced?", options:["Mitochondria","Nucleus","Ribosome"], correct:"Mitochondria", explanation:"Mitochondria produce ATP via aerobic respiration (electron transport chain)." },
+      { q:"Which structure carries genetic information?", options:["Ribosome","DNA","Chloroplast"], correct:"DNA", explanation:"DNA stores hereditary information that codes proteins and cell functions." },
+      { q:"Which is NOT a common state of matter at Earth's surface?", options:["Solid","Liquid","Plasma"], correct:"Plasma", explanation:"Plasma occurs at very high energy (stars, lightning), not typical at Earth's surface." }
+    ]
+  },
+  Math: {
+    Easy: [
+      { q:"What is 6 × 7?", options:["42","36","48"], correct:"42", explanation:"6 times 7 equals 42." },
+      { q:"What is 15 − 9?", options:["6","4","24"], correct:"6", explanation:"15 minus 9 equals 6." },
+      { q:"If a = 3 and b = 4, what is a + b?", options:["7","12","1"], correct:"7", explanation:"3 + 4 = 7." }
+    ],
+    Hard: [
+      { q:"Solve: 2(x + 3) = 14. What is x?", options:["4","3","2"], correct:"4", explanation:"2(x+3)=14 → x+3=7 → x=4." },
+      { q:"Area of rectangle 5 by 8?", options:["40","13","26"], correct:"40", explanation:"Area = length × width = 5 × 8 = 40." },
+      { q:"Simplify 9/12", options:["3/4","9/12","1/3"], correct:"3/4", explanation:"GCD(9,12)=3 → (9÷3)/(12÷3)=3/4." }
+    ]
+  }
+};
+
+/* Utility functions */
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+/* Build a 25-question quiz
+   - If Mixed mode is on, pull across subjects
+   - If subject-specific, pull from chosen subject/level
+*/
+function buildQuiz(settings){
+  let pool = [];
+  if(settings.mixed){
+    // Grab from all subjects across chosen levels
+    Object.keys(QUESTION_BANK).forEach(sub=>{
+      Object.keys(QUESTION_BANK[sub]).forEach(lvl=>{
+        QUESTION_BANK[sub][lvl].forEach(q=> pool.push({ ...q, subject: sub, level: lvl }));
+      });
+    });
+  } else {
+    const list = QUESTION_BANK[settings.subject][settings.level] || [];
+    list.forEach(q => pool.push({ ...q, subject: settings.subject, level: settings.level }));
+    // also add other from same subject other level if short
+    Object.keys(QUESTION_BANK[settings.subject]).forEach(lvl=>{
+      if(lvl !== settings.level) QUESTION_BANK[settings.subject][lvl].forEach(q=>pool.push({...q,subject:settings.subject,level:lvl}));
+    });
+  }
+
+  // if still less than 25, add across others
+  if(pool.length < 25){
+    Object.keys(QUESTION_BANK).forEach(sub=>{
+      Object.keys(QUESTION_BANK[sub]).forEach(lvl=>{
+        QUESTION_BANK[sub][lvl].forEach(q=> pool.push({ ...q, subject: sub, level: lvl }));
+      });
+    });
+  }
+
+  // fill with auto-generated simple questions if needed
+  while(pool.length < 25){
+    const n = Math.floor(Math.random()*12)+1;
+    pool.push({
+      q:`What is ${n} + ${n}?`,
+      options:[String(n+n-1), String(n+n), String(n+n+1)],
+      correct:String(n+n),
+      explanation:`Adding a number to itself doubles it: ${n} + ${n} = ${n+n}.`,
+      subject:"Auto",
+      level:"Auto"
+    });
+  }
+
+  // shuffle and slice 25
+  shuffle(pool);
+  return pool.slice(0,25);
+}
+
+/* -------------------------
+   Quiz runtime
+   ------------------------- */
+let QUIZ = {
+  questions: [],
+  index: 0,
+  score: 0,
+  perQuestionTimer: 30,
+  totalTimer: 600,
+  qInterval: null,
+  totalInterval: null,
+  startTime: null,
+  settings: {}
+};
+
+/* DOM refs */
+const qTimerEl = document.getElementById("qTimer");
+const totalTimerEl = document.getElementById("totalTimer");
+const qIndexEl = document.getElementById("qIndex");
+const questionTextEl = document.getElementById("questionText");
+const optionsContainerEl = document.getElementById("optionsContainer");
+const feedbackAreaEl = document.getElementById("feedbackArea");
+const finalScoreEl = document.getElementById("finalScore");
+const leaderboardTableEl = document.getElementById("leaderboardTable");
+
+/* Audio (SpeechSynthesis) */
+let synth = window.speechSynthesis;
+function speak(text){
+  if(!synth) return;
+  // cancel previous
+  synth.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 1;
+  utter.pitch = 1;
+  utter.lang = 'en-US';
+  synth.speak(utter);
+}
+
+/* CONFETTI */
+const confettiCanvas = document.getElementById("confettiCanvas");
+confettiCanvas.width = window.innerWidth;
+confettiCanvas.height = window.innerHeight;
+window.addEventListener('resize', ()=>{ confettiCanvas.width = window.innerWidth; confettiCanvas.height = window.innerHeight; });
+
+let confettiPieces = [];
+function spawnConfetti() {
+  confettiPieces = [];
+  const colors = ["#ff595e","#ffca3a","#8ac926","#1982c4","#6a4c93"];
+  for(let i=0;i<150;i++){
+    confettiPieces.push({
+      x: Math.random()*confettiCanvas.width,
+      y: Math.random()*-confettiCanvas.height,
+      w: Math.random()*8+4,
+      h: Math.random()*8+4,
+      vx: Math.random()*6-3,
+      vy: Math.random()*6+2,
+      rot: Math.random()*360,
+      color: colors[Math.floor(Math.random()*colors.length)],
+      spin: Math.random()*0.2+0.05
+    });
+  }
+  requestAnimationFrame(confettiLoop);
+}
+function confettiLoop(){
+  const ctx = confettiCanvas.getContext('2d');
+  ctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+  for(let p of confettiPieces){
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.12; // gravity
+    p.rot += p.spin;
+    ctx.save();
+    ctx.translate(p.x,p.y);
+    ctx.rotate(p.rot);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+    ctx.restore();
+  }
+  // remove pieces that fell below
+  confettiPieces = confettiPieces.filter(p=>p.y < confettiCanvas.height + 50);
+  if(confettiPieces.length>0) requestAnimationFrame(confettiLoop);
+}
+
+/* -------------------------
+   Start quiz
+   ------------------------- */
+function beginQuiz(){
+  if(!CURRENT_USER){ alert("Please log in first."); showPage("authPage"); return; }
+  const settings = {
+    subject: document.getElementById("subjectSelect").value,
+    level: document.getElementById("levelSelect").value,
+    mixed: document.getElementById("mixedMode").checked,
+    audio: document.getElementById("audioToggle").checked,
+    explainOnCorrect: document.getElementById("perQuestionExplain").checked,
+    confetti: document.getElementById("confettiToggle").checked,
+    randomizeOptions: document.getElementById("randomizeOptions").checked
+  };
+  QUIZ.settings = settings;
+  QUIZ.questions = buildQuiz(settings);
+  if(settings.randomizeOptions){
+    QUIZ.questions = QUIZ.questions.map(q=>{
+      const opts = [...q.options];
+      shuffle(opts);
+      return {...q, options: opts};
+    });
+  }
+  QUIZ.index = 0; QUIZ.score = 0; QUIZ.perQuestionTimer = 30; QUIZ.totalTimer = 600; QUIZ.startTime = Date.now();
+
+  showPage("quizPage");
+  renderQuestion();
+  startTimers();
+}
+
+/* timers */
+function startTimers(){
+  stopTimers();
+  qTimerEl.textContent = QUIZ.perQuestionTimer;
+  totalTimerEl.textContent = formatTime(QUIZ.totalTimer);
+
+  QUIZ.qInterval = setInterval(()=>{
+    QUIZ.perQuestionTimer--;
+    qTimerEl.textContent = QUIZ.perQuestionTimer;
+    if(QUIZ.perQuestionTimer <= 0){
+      showFeedback(null, true);
+      setTimeout(()=> advanceQuestion(), 1100);
+    }
+  }, 1000);
+
+  QUIZ.totalInterval = setInterval(()=>{
+    QUIZ.totalTimer--;
+    totalTimerEl.textContent = formatTime(QUIZ.totalTimer);
+    if(QUIZ.totalTimer <= 0){
+      finishQuiz();
+    }
+  }, 1000);
+}
+function stopTimers(){
+  if(QUIZ.qInterval){ clearInterval(QUIZ.qInterval); QUIZ.qInterval = null; }
+  if(QUIZ.totalInterval){ clearInterval(QUIZ.totalInterval); QUIZ.totalInterval = null; }
+}
+
+/* render question */
+function renderQuestion(){
+  const q = QUIZ.questions[QUIZ.index];
+  qIndexEl.textContent = QUIZ.index + 1;
+  questionTextEl.textContent = q.q;
+  optionsContainerEl.innerHTML = "";
+  feedbackAreaEl.innerHTML = "";
+
+  q.options.forEach(opt=>{
+    const btn = document.createElement("button");
+    btn.className = "optionBtn";
+    btn.textContent = opt;
+    btn.onclick = ()=> handleAnswer(opt);
+    optionsContainerEl.appendChild(btn);
+  });
+
+  // reset per-question timer
+  QUIZ.perQuestionTimer = 30;
+  qTimerEl.textContent = QUIZ.perQuestionTimer;
+}
+
+/* handle answer selection */
+function handleAnswer(choice){
+  [...optionsContainerEl.querySelectorAll("button")].forEach(b=>b.disabled=true);
+  showFeedback(choice, false);
+}
+
+/* show feedback with explanation (even when correct if setting enabled) */
+function showFeedback(choice, timedOut){
+  const q = QUIZ.questions[QUIZ.index];
+  feedbackAreaEl.innerHTML = "";
+  const settings = QUIZ.settings;
+
+  if(timedOut){
+    const el = document.createElement("div");
+    el.className = "incorrectBox";
+    el.innerHTML = `<strong>Time's up — no answer selected.</strong>`;
+    feedbackAreaEl.appendChild(el);
+
+    const ex = document.createElement("div");
+    ex.className = "explanation";
+    ex.innerHTML = `<strong>Deep Explanation:</strong> ${q.explanation} <br/><em>Tip:</em> Try to manage time — if unsure, guess and move on.`;
+    feedbackAreaEl.appendChild(ex);
+
+    if(settings.audio) speak(q.explanation + " Tip: try to manage your time. If unsure, make a guess and continue.");
+  } else {
+    const correct = (choice === q.correct);
+    if(correct){
+      const el = document.createElement("div");
+      el.className = "correctBox";
+      el.innerHTML = `<strong>Correct ✓</strong>`;
+      feedbackAreaEl.appendChild(el);
+      if(settings.explainOnCorrect){
+        const ex = document.createElement("div");
+        ex.className = "explanation";
+        ex.innerHTML = `<strong>Explanation:</strong> ${q.explanation}`;
+        feedbackAreaEl.appendChild(ex);
+        if(settings.audio) speak(q.explanation);
+      }
+      QUIZ.score++;
+    } else {
+      const el = document.createElement("div");
+      el.className = "incorrectBox";
+      el.innerHTML = `<strong>Incorrect ✗</strong> — your answer: "${choice}"`;
+      feedbackAreaEl.appendChild(el);
+
+      const ex = document.createElement("div");
+      ex.className = "explanation";
+      ex.innerHTML = `<strong>Deep Explanation:</strong> ${q.explanation}`;
+      feedbackAreaEl.appendChild(ex);
+      if(settings.audio) speak(q.explanation);
+    }
+  }
+
+  // pause per-question timer briefly
+  clearInterval(QUIZ.qInterval);
+  // auto-advance after short delay
+  setTimeout(()=> advanceQuestion(), 1400);
+}
+
+/* advance question */
+function advanceQuestion(){
+  QUIZ.index++;
+  if(QUIZ.index >= QUIZ.questions.length){
+    finishQuiz();
+    return;
+  }
+  // restart per-question timer interval
+  if(QUIZ.qInterval) clearInterval(QUIZ.qInterval);
+  QUIZ.perQuestionTimer = 30;
+  qTimerEl.textContent = QUIZ.perQuestionTimer;
+  QUIZ.qInterval = setInterval(()=>{
+    QUIZ.perQuestionTimer--;
+    qTimerEl.textContent = QUIZ.perQuestionTimer;
+    if(QUIZ.perQuestionTimer <= 0){
+      showFeedback(null,true);
+      setTimeout(()=> advanceQuestion(),1100);
+    }
+  },1000);
+
+  renderQuestion();
+}
+
+/* manual next button */
+function handleNext(){
+  // if currently in middle of question, advance (treat as skip)
+  advanceQuestion();
+}
+
+/* finish quiz */
+function finishQuiz(){
+  stopTimers();
+  const used = Math.floor((Date.now() - QUIZ.startTime)/1000);
+  // save score
+  const db = getDB();
+  db.scores.push({
+    user: CURRENT_USER || "guest",
+    score: QUIZ.score,
+    subject: QUIZ.settings.mixed ? "Mixed" : QUIZ.settings.subject,
+    level: QUIZ.settings.mixed ? "Mixed" : QUIZ.settings.level,
+    timeSec: used,
+    date: new Date().toISOString()
+  });
+  saveDB(db);
+
+  finalScoreEl.textContent = `You scored ${QUIZ.score} / ${QUIZ.questions.length}`;
+
+  // confetti if high score and enabled
+  const confettiEnabled = QUIZ.settings.confetti && document.getElementById("confettiToggle").checked;
+  if(confettiEnabled && QUIZ.score >= 20){
+    spawnConfetti();
+  }
+
+  showPage("finalPage");
+}
+
+/* early finish */
+function finishEarly(){
+  if(confirm("Finish quiz now? Your current answers will be submitted.")) finishQuiz();
+}
+
+/* -------------------------
+   Leaderboard
+   ------------------------- */
+function openLeaderboard(){
+  loadLeaderboard();
+  showPage("leaderboardPage");
+}
+function loadLeaderboard(){
+  const db = getDB();
+  const sorted = db.scores.slice().sort((a,b)=>{
+    if(b.score !== a.score) return b.score - a.score;
+    return a.timeSec - b.timeSec;
+  }).slice(0,100);
+  let html = `<tr><th>#</th><th>User</th><th>Score</th><th>Subject (Level)</th><th>Time</th><th>Date</th></tr>`;
+  sorted.forEach((r,i)=>{
+    html += `<tr>
+      <td>${i+1}</td>
+      <td>${escapeHtml(r.user)}</td>
+      <td>${r.score}</td>
+      <td>${escapeHtml(r.subject)} (${escapeHtml(r.level)})</td>
+      <td>${r.timeSec}s</td>
+      <td>${new Date(r.date).toLocaleString()}</td>
+    </tr>`;
+  });
+  leaderboardTableEl.innerHTML = html;
+}
+function backToSetup(){ if(!CURRENT_USER) showPage("authPage"); else showPage("setupPage"); }
+function goToSetup(){ if(!CURRENT_USER) showPage("authPage"); else showPage("setupPage"); }
+function clearLeaderboard(){ if(!confirm("Clear all leaderboard data? This cannot be undone.")) return; const db = getDB(); db.scores = []; saveDB(db); loadLeaderboard(); }
+
+/* helpers */
+function formatTime(sec){ if(sec < 0) sec = 0; const m = Math.floor(sec/60); const s = sec%60; return `${m}:${s<10?"0":""}${s}`; }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* toggle audio preview (play explanation for current question) */
+function toggleAudioPreview(){
+  const settings = QUIZ.settings;
+  const q = QUIZ.questions[QUIZ.index];
+  if(!q) return;
+  if(settings && settings.audio) speak(q.explanation);
+  else {
+    // temporarily say it anyway
+    speak(q.explanation);
+  }
+}
+
+/* initialization */
+(function init(){
+  getDB(); // ensure data exists
+  showPage("authPage");
+  // wire import input if present (some browsers)
+  const fileInput = document.getElementById("importFile");
+  if(fileInput) fileInput.addEventListener('change', importDB);
+})();
+</script>
+</body>
+</html>
