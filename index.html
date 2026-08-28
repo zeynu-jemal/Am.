@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Meta Description for Website SEO & Overview -->
+    <meta name="description" content="AL-NOOR Islamic Portal is your complete digital companion featuring the Holy Quran with verse-by-verse audio recitations, authentic Hadith collections, precise prayer times, Qibla direction, daily duas, and fully customizable themes.">
+    <title>AL-NOOR Islamic Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-color: #38bdf8;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --nav-bg: #1e293b;
+            --indicator-bg: #38bdf8;
+            --border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 160px;
+            transition: background-color 0.3s ease;
+            position: relative;
+        }
+
+        /* Background Media Layer */
+        #bg-media-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        #bg-media-container video,
+        #bg-media-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.75);
+            z-index: -1;
+            transition: background 0.3s ease;
+        }
+
+        header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 24px;
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-logo {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent-color);
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+        }
+
+        header h1 {
+            font-size: 1.25rem;
+            color: var(--accent-color);
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .theme-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: var(--text-sub);
+        }
+
+        .color-picker-wrapper input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            cursor: pointer;
+            background: none;
+        }
+
+        .color-picker-wrapper input[type="color"]::-webkit-color-swatch {
+            border: 2px solid #fff;
+            border-radius: 50%;
+        }
+
+        .bg-url-btn, .about-btn {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--border-color);
+            color: var(--accent-color);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .bg-url-btn:hover, .about-btn:hover {
+            border-color: var(--accent-color);
+            background: rgba(56, 189, 248, 0.1);
+        }
+
+        /* About Exclamation Circle Button style */
+        .about-btn {
+            padding: 5px 10px;
+            gap: 8px;
+        }
+
+        .about-icon-circle {
+            width: 18px;
+            height: 18px;
+            border: 1.5px solid var(--accent-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        .container {
+            width: 92%;
+            max-width: 650px;
+            margin-top: 20px;
+        }
+
+        .tab-content {
+            display: none;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+            border: 1px solid var(--border-color);
+            animation: fadeIn 0.3s ease-in-out forwards;
+            backdrop-filter: blur(8px);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            margin-bottom: 16px;
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .control-group label {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-main);
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        select:focus, input[type="text"]:focus {
+            border-color: var(--accent-color);
+        }
+
+        .reciter-card-btn {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .reciter-card-btn:hover {
+            border-color: var(--accent-color);
+            background: rgba(56, 189, 248, 0.05);
+        }
+
+        .reciter-card-info {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .reciter-avatar {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            overflow: hidden;
+            border: 2px solid var(--accent-color);
+            flex-shrink: 0;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            width: 90%;
+            max-width: 500px;
+            height: 80vh;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1.1rem;
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .close-btn {
+            background: none;
+            border: None;
+            color: var(--text-sub);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .close-btn:hover {
+            color: #ef4444;
+        }
+
+        .modal-search {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .modal-search i {
+            position: absolute;
+            left: 32px;
+            top: 24px;
+            color: var(--text-sub);
+        }
+
+        .modal-search input {
+            padding-left: 38px;
+        }
+
+        .reciter-list-container, .bg-modal-body, .about-modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .reciter-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            border-radius: 14px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .reciter-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .reciter-item.selected {
+            background: rgba(56, 189, 248, 0.12);
+            border-color: var(--accent-color);
+        }
+
+        /* Instructions & Info Window Styling */
+        .bg-info-box, .about-info-box {
+            background: rgba(56, 189, 248, 0.08);
+            border: 1px solid var(--accent-color);
+            border-radius: 14px;
+            padding: 16px;
+            color: var(--text-main);
+        }
+
+        .bg-info-box h4, .about-info-box h4 {
+            color: var(--accent-color);
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bg-info-box ul, .about-info-box ul {
+            margin-left: 18px;
+            font-size: 0.82rem;
+            color: var(--text-sub);
+            line-height: 1.6;
+        }
+
+        .bg-info-box li, .about-info-box li {
+            margin-bottom: 4px;
+        }
+
+        .search-btn {
+            padding: 12px 16px;
+            background: var(--accent-color);
+            color: #0f172a;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+        }
+
+        .search-btn:hover {
+            opacity: 0.9;
+        }
+
+        .data-card {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .arabic-text {
+            font-family: 'Amiri', serif;
+            font-size: 1.5rem;
+            text-align: right;
+            margin-bottom: 12px;
+            line-height: 2.2;
+            color: var(--accent-color);
+        }
+
+        .translation {
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .dalil-tag {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent-color);
+            background: rgba(56, 189, 248, 0.1);
+            padding: 4px 10px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-top: 6px;
+        }
+
+        audio {
+            width: 100%;
+            height: 38px;
+            outline: none;
+            margin-top: 10px;
+        }
+
+        .prayer-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .prayer-row:last-child {
+            border-bottom: none;
+        }
+
+        .dua-category-btn {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-right: 6px;
+            margin-bottom: 8px;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+
+        .dua-category-btn.active {
+            background: var(--accent-color);
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+        .compass-container {
+            width: 180px;
+            height: 180px;
+            border: 4px solid var(--accent-color);
+            border-radius: 50%;
+            margin: 20px auto;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .compass-pointer {
+            width: 6px;
+            height: 75px;
+            background: #ef4444;
+            position: absolute;
+            top: 15px;
+            transform-origin: bottom center;
+            border-radius: 4px;
+            transition: transform 0.1s linear;
+        }
+
+        .adhan-banner {
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid var(--accent-color);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-wrapper {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(8px);
+            padding: 6px 10px;
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .shifter-btn {
+            background: var(--card-bg);
+            color: var(--accent-color);
+            border: 1px solid var(--border-color);
+            width: 34px;
+            height: 48px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .shifter-btn:hover {
+            background: var(--accent-color);
+            color: #0f172a;
+        }
+
+        .navigation {
+            position: relative;
+            width: 300px;
+            height: 60px;
+            background: var(--nav-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 16px;
+            overflow: visible;
+            transition: background 0.3s ease;
+        }
+
+        .navigation ul {
+            display: flex;
+            width: 300px;
+            position: relative;
+            padding: 0;
+            list-style: none;
+        }
+
+        .navigation ul li {
+            position: relative;
+            list-style: none;
+            width: 60px;
+            height: 60px;
+            z-index: 1;
+        }
+
+        .navigation ul li a {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            width: 100%;
+            text-align: center;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .navigation ul li a .icon {
+            position: relative;
+            display: block;
+            line-height: 65px;
+            font-size: 1.2em;
+            text-align: center;
+            transition: 0.5s;
+            color: var(--text-sub);
+        }
+
+        .navigation ul li.active a .icon {
+            transform: translateY(-26px);
+            color: #fff;
+        }
+
+        .navigation ul li a .text {
+            position: absolute;
+            color: var(--text-main);
+            font-weight: 400;
+            font-size: 0.65rem;
+            letter-spacing: 0.05em;
+            transition: 0.5s;
+            opacity: 0;
+            transform: translateY(18px);
+        }
+
+        .navigation ul li.active a .text {
+            opacity: 1;
+            transform: translateY(8px);
+        }
+
+        .indicator {
+            position: absolute;
+            top: -45%;
+            width: 56px;
+            height: 56px;
+            background: var(--indicator-bg);
+            border-radius: 50%;
+            border: 5px solid var(--bg-color);
+            transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease, border-color 0.3s ease;
+        }
+
+        .indicator::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: -18px;
+            width: 18px;
+            height: 18px;
+            background: transparent;
+            border-top-right-radius: 18px;
+            box-shadow: 1px -9px 0 0 var(--bg-color);
+        }
+
+        .indicator::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -18px;
+            width: 18px;
+            height: 18px;
+            background: transparent;
+            border-top-left-radius: 18px;
+            box-shadow: -1px -9px 0 0 var(--bg-color);
+        }
+
+        .navigation.pos-0 .indicator { transform: translateX(0px); }
+        .navigation.pos-1 .indicator { transform: translateX(60px); }
+        .navigation.pos-2 .indicator { transform: translateX(120px); }
+        .navigation.pos-3 .indicator { transform: translateX(180px); }
+        .navigation.pos-4 .indicator { transform: translateX(240px); }
+    </style>
+</head>
+<body>
+
+    <!-- Optional Background Media Layer -->
+    <div id="bg-media-container"></div>
+    <div id="bg-overlay"></div>
+
+    <header>
+        <div class="header-brand">
+            <img src="alnoor.png" alt="AL-NOOR Logo" class="header-logo">
+            <h1>AL-NOOR</h1>
+        </div>
+        <div class="theme-controls">
+            <!-- About Button with Circled Exclamation Mark -->
+            <button class="about-btn" onclick="openAboutModal()" title="About AL-NOOR">
+                <div class="about-icon-circle">!</div>
+                <span>About</span>
+            </button>
+            <button class="bg-url-btn" onclick="openBgModal()"><i class="fa-solid fa-film"></i> BG Customizer</button>
+            <div class="color-picker-wrapper">
+                <label for="nav-color-picker">Nav:</label>
+                <input type="color" id="nav-color-picker" value="#1e293b">
+            </div>
+            <div class="color-picker-wrapper">
+                <label for="accent-color-picker">Accent:</label>
+                <input type="color" id="accent-color-picker" value="#38bdf8">
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Quran Tab -->
+        <div id="quran" class="tab-content active">
+            <h2><i class="fa-solid fa-book-quran"></i> Holy Quran</h2>
+            <div class="control-group">
+                <label>Select Surah:</label>
+                <select id="surah-select" onchange="loadSurah()"></select>
+            </div>
+            
+            <div class="control-group">
+                <label>Selected Reciter:</label>
+                <div class="reciter-card-btn" onclick="openReciterModal()">
+                    <div class="reciter-card-info">
+                        <div class="reciter-avatar" id="active-reciter-avatar"><i class="fa-solid fa-user"></i></div>
+                        <div>
+                            <div class="reciter-name-display" id="active-reciter-name">Mishary Rashid Alafasy</div>
+                            <div class="reciter-sub-display" id="active-reciter-sub">Verse-by-Verse Recitation</div>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right" style="color: var(--text-sub);"></i>
+                </div>
+            </div>
+
+            <div id="quran-container">
+                <div class="data-card">Select a Surah to begin...</div>
+            </div>
+        </div>
+
+        <!-- Hadith Tab -->
+        <div id="hadith" class="tab-content">
+            <h2><i class="fa-solid fa-book-open"></i> Authentic Hadith Library</h2>
+            <div class="control-group">
+                <label>Select Collection:</label>
+                <select id="hadith-book-select">
+                    <option value="bukhari">Sahih al-Bukhari</option>
+                    <option value="muslim" selected>Sahih Muslim</option>
+                    <option value="tirmidhi">Jami` at-Tirmidhi</option>
+                    <option value="abudawud">Sunan Abu Dawud</option>
+                    <option value="nasai">Sunan an-Nasa'i</option>
+                    <option value="ibnmajah">Sunan Ibn Majah</option>
+                    <option value="malik">Muwatta Malik</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Hadith Number:</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="hadith-input" value="1" placeholder="Enter number...">
+                    <button class="search-btn" onclick="fetchHadithData()">Fetch Hadith</button>
+                </div>
+            </div>
+            <div id="hadith-container">
+                <div class="data-card">Enter a Hadith number to view details...</div>
+            </div>
+        </div>
+
+        <!-- Duas Tab -->
+        <div id="duas" class="tab-content">
+            <h2><i class="fa-solid fa-hands-praying"></i> Authentic Duas</h2>
+            <div id="dua-categories">
+                <button class="dua-category-btn active" onclick="filterDua('morning')">Morning</button>
+                <button class="dua-category-btn" onclick="filterDua('evening')">Evening</button>
+                <button class="dua-category-btn" onclick="filterDua('sick')">Healing</button>
+                <button class="dua-category-btn" onclick="filterDua('travel')">Travel</button>
+            </div>
+            <div id="dua-list"></div>
+        </div>
+
+        <!-- Prayer Times Tab -->
+        <div id="prayers" class="tab-content">
+            <h2><i class="fa-solid fa-clock"></i> Prayer Times & Adhan</h2>
+            <div class="adhan-banner">
+                <div>
+                    <strong style="font-size: 0.9rem;">Auto Adhan Audio</strong>
+                    <div class="translation" style="margin: 0; font-size: 0.75rem;">Enable sound notifications</div>
+                </div>
+                <button class="search-btn" id="adhan-perm-btn" onclick="toggleAdhanPermission()">Enable</button>
+            </div>
+            <div class="control-group">
+                <label>Enter City & Country:</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="city-input" placeholder="City (e.g., Cairo, London)">
+                    <button class="search-btn" onclick="fetchCityData()">Search</button>
+                </div>
+            </div>
+            <div class="data-card" id="prayer-list">Enter a city to view schedule.</div>
+        </div>
+
+        <!-- Qibla Tab -->
+        <div id="qibla" class="tab-content">
+            <h2><i class="fa-solid fa-compass"></i> Qibla Direction</h2>
+            <div class="data-card" style="text-align: center;">
+                <p class="translation" id="qibla-city-label">Selected City Direction:</p>
+                <div class="compass-container">
+                    <div class="compass-pointer" id="compass-pointer"></div>
+                </div>
+                <h3 id="qibla-degree" style="font-size: 1.8rem; margin: 8px 0; color: var(--accent-color);">--°</h3>
+                <button class="search-btn" style="margin-top: 10px; font-size: 0.8rem;" onclick="initRealTimeCompass()">Calibrate Sensor</button>
+            </div>
+        </div>
+
+        <!-- Weather Tab -->
+        <div id="weather" class="tab-content">
+            <h2><i class="fa-solid fa-cloud-sun"></i> Local Weather</h2>
+            <div class="data-card" style="text-align: center;">
+                <p class="translation" id="weather-city-label">Current Location Weather:</p>
+                <h3 id="weather-temp" style="font-size: 2.5rem; color: var(--accent-color); margin: 10px 0;">--°C</h3>
+                <p id="weather-desc" class="translation">N/A</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal About Window -->
+    <div class="modal-overlay" id="about-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-circle-info"></i> About AL-NOOR Portal</h3>
+                <button class="close-btn" onclick="closeAboutModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="about-modal-body">
+                <div class="about-info-box">
+                    <h4><i class="fa-solid fa-book-quran"></i> Portal Overview</h4>
+                    <p class="translation" style="color: var(--text-main); margin-bottom: 12px;">
+                        AL-NOOR Islamic Portal is your complete digital companion designed to enrich your daily spiritual routine. It seamlessly integrates the Holy Quran with multiple reciters, authenticated Hadith collections, precise city-based prayer schedules, Qibla tracking, and morning/evening duas.
+                    </p>
+                    <h4><i class="fa-solid fa-palette"></i> Customization Features</h4>
+                    <ul>
+                        <li><strong>Theme Customizer:</strong> Personalize navigation bars and theme accent colors to suit your taste.</li>
+                        <li><strong>Dynamic Backgrounds:</strong> Load custom background images or looping video links using the BG Customizer panel.</li>
+                        <li><strong>Fluid Navigation:</strong> Easy touch-responsive fluid motion menu layout for quick access across all utilities.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Reciter Selection Window -->
+    <div class="modal-overlay" id="reciter-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-users"></i> Choose Reciter</h3>
+                <button class="close-btn" onclick="closeReciterModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="reciter-search-input" placeholder="Search reciters..." oninput="filterReciterList()">
+            </div>
+            <div class="reciter-list-container" id="reciter-modal-list"></div>
+        </div>
+    </div>
+
+    <!-- Modal Background Customizer Window with Instructions & Info -->
+    <div class="modal-overlay" id="bg-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-film"></i> Background Customizer</h3>
+                <button class="close-btn" onclick="closeBgModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="bg-modal-body">
+                <!-- Instructions & Information Box -->
+                <div class="bg-info-box">
+                    <h4><i class="fa-solid fa-circle-info"></i> Guide & Instructions</h4>
+                    <ul>
+                        <li><strong>Supported Formats:</strong> Paste direct image links (JPG, PNG, WebP) or direct video links (MP4, WebM).</li>
+                        <li><strong>Video Performance:</strong> Videos auto-loop silently in the background. Use light-weight videos for smooth loading.</li>
+                        <li><strong>Clearing Background:</strong> Leave the input field completely empty and click 'Apply Background' to revert to the default solid theme.</li>
+                    </ul>
+                </div>
+
+                <div class="control-group" style="margin-top: 10px;">
+                    <label for="bg-url-input">Image or Video Direct URL:</label>
+                    <input type="text" id="bg-url-input" placeholder="https://example.com/video.mp4 or image.jpg">
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button class="search-btn" style="flex: 1;" onclick="applyBgFromModal()">Apply Background</button>
+                    <button class="search-btn" style="flex: 1; background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444;" onclick="clearBgMedia()">Remove Background</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Liquid Navigation Wrapper with Shifter Arrows < and > -->
+    <div class="nav-wrapper">
+        <button class="shifter-btn" onclick="shiftNavLeft()" title="Previous Tabs"><i class="fa-solid fa-chevron-left"></i></button>
+        
+        <div class="navigation pos-0" id="main-nav-bar">
+            <ul id="nav-ul-list">
+                <li class="list active" id="nav-item-0" onclick="handleSlotClick(0)">
+                    <a href="#"><span class="icon" id="icon-0"><i class="fa-solid fa-book-quran"></i></span><span class="text" id="text-0">Quran</span></a>
+                </li>
+                <li class="list" id="nav-item-1" onclick="handleSlotClick(1)">
+                    <a href="#"><span class="icon" id="icon-1"><i class="fa-solid fa-hands-praying"></i></span><span class="text" id="text-1">Duas</span></a>
+                </li>
+                <li class="list" id="nav-item-2" onclick="handleSlotClick(2)">
+                    <a href="#"><span class="icon" id="icon-2"><i class="fa-solid fa-clock"></i></span><span class="text" id="text-2">Prayers</span></a>
+                </li>
+                <li class="list" id="nav-item-3" onclick="handleSlotClick(3)">
+                    <a href="#"><span class="icon" id="icon-3"><i class="fa-solid fa-compass"></i></span><span class="text" id="text-3">Qibla</span></a>
+                </li>
+                <li class="list" id="nav-item-4" onclick="handleSlotClick(4)">
+                    <a href="#"><span class="icon" id="icon-4"><i class="fa-solid fa-cloud-sun"></i></span><span class="text" id="text-4">Weather</span></a>
+                </li>
+                <div class="indicator"></div>
+            </ul>
+        </div>
+
+        <button class="shifter-btn" onclick="shiftNavRight()" title="More Tabs (Hadith)"><i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+
+    <audio id="adhan-player" style="display:none;"></audio>
+
+    <script>
+        const allTabs = [
+            { id: 'quran', name: 'Quran', icon: 'fa-solid fa-book-quran' },
+            { id: 'duas', name: 'Duas', icon: 'fa-solid fa-hands-praying' },
+            { id: 'prayers', name: 'Prayers', icon: 'fa-solid fa-clock' },
+            { id: 'qibla', name: 'Qibla', icon: 'fa-solid fa-compass' },
+            { id: 'weather', name: 'Weather', icon: 'fa-solid fa-cloud-sun' },
+            { id: 'hadith', name: 'Hadith', icon: 'fa-solid fa-book-open' }
+        ];
+
+        let currentViewOffset = 0; 
+        let activeTabId = 'quran';
+        const navBar = document.getElementById('main-nav-bar');
+        let reciterDataList = [];
+        let selectedReciterId = 'ar.alafasy';
+        let rawQiblaBearing = 0;
+        let activePrayerTimings = {};
+        let adhanTriggeredToday = {};
+        
+        const standardAdhanUrl = "https://cdn.islamicfinder.org/adhan/makkah.mp3";
+
+        // About Modal Controls
+        function openAboutModal() {
+            document.getElementById('about-modal').classList.add('active');
+        }
+
+        function closeAboutModal() {
+            document.getElementById('about-modal').classList.remove('active');
+        }
+
+        // Background Modal Controls
+        function openBgModal() {
+            document.getElementById('bg-url-input').value = localStorage.getItem('custom_bg_url') || "";
+            document.getElementById('bg-modal').classList.add('active');
+        }
+
+        function closeBgModal() {
+            document.getElementById('bg-modal').classList.remove('active');
+        }
+
+        function applyBgFromModal() {
+            let url = document.getElementById('bg-url-input').value.trim();
+            localStorage.setItem('custom_bg_url', url);
+            applyBgMedia(url);
+            closeBgModal();
+        }
+
+        function clearBgMedia() {
+            document.getElementById('bg-url-input').value = "";
+            localStorage.removeItem('custom_bg_url');
+            applyBgMedia("");
+            closeBgModal();
+        }
+
+        function applyBgMedia(url) {
+            const container = document.getElementById('bg-media-container');
+            container.innerHTML = "";
+            if (!url) return;
+
+            const isVideo = url.match(/\.(mp4|webm|ogg|mov)([\?#]|$)/i) || url.includes("video");
+            if (isVideo) {
+                const vid = document.createElement('video');
+                vid.src = url;
+                vid.autoplay = true;
+                vid.loop = true;
+                vid.muted = true;
+                vid.playsInline = true;
+                container.appendChild(vid);
+            } else {
+                const img = document.createElement('img');
+                img.src = url;
+                container.appendChild(img);
+            }
+        }
+
+        // Load saved background media on startup
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedBg = localStorage.getItem('custom_bg_url');
+            if (savedBg) applyBgMedia(savedBg);
+        });
+
+        function renderNavBar() {
+            for (let i = 0; i < 5; i++) {
+                const tabIndex = currentViewOffset + i;
+                const tabInfo = allTabs[tabIndex];
+                
+                const iconEl = document.getElementById(`icon-${i}`);
+                const textEl = document.getElementById(`text-${i}`);
+                const itemEl = document.getElementById(`nav-item-${i}`);
+
+                iconEl.innerHTML = `<i class="${tabInfo.icon}"></i>`;
+                textEl.innerText = tabInfo.name;
+
+                if (tabInfo.id === activeTabId) {
+                    itemEl.classList.add('active');
+                    navBar.className = `navigation pos-${i}`;
+                } else {
+                    itemEl.classList.remove('active');
+                }
+            }
+        }
+
+        function shiftNavRight() {
+            if (currentViewOffset < 1) {
+                currentViewOffset = 1;
+                renderNavBar();
+            }
+        }
+
+        function shiftNavLeft() {
+            if (currentViewOffset > 0) {
+                currentViewOffset = 0;
+                renderNavBar();
+            }
+        }
+
+        function handleSlotClick(slotIndex) {
+            const actualTabIndex = currentViewOffset + slotIndex;
+            activeTabId = allTabs[actualTabIndex].id;
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(activeTabId).classList.add('active');
+            renderNavBar();
+        }
+
+        document.getElementById('nav-color-picker').addEventListener('input', (e) => {
+            document.documentElement.style.setProperty('--nav-bg', e.target.value);
+            document.documentElement.style.setProperty('--card-bg', e.target.value);
+        });
+
+        document.getElementById('accent-color-picker').addEventListener('input', (e) => {
+            document.documentElement.style.setProperty('--accent-color', e.target.value);
+            document.documentElement.style.setProperty('--indicator-bg', e.target.value);
+        });
+
+        // Fixed Hadith Fetcher with Arabic text enabled and fallback safety
+        async function fetchHadithData() {
+            const collection = document.getElementById('hadith-book-select').value;
+            const inputVal = document.getElementById('hadith-input').value.trim() || '1';
+            const container = document.getElementById('hadith-container');
+            
+            container.innerHTML = '<div class="data-card"><i class="fa-solid fa-spinner fa-spin"></i> Loading Hadith...</div>';
+
+            try {
+                const [engRes, araRes] = await Promise.all([
+                    fetch(`https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/eng-${collection}/${inputVal}.json`),
+                    fetch(`https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/ara-${collection}/${inputVal}.json`).catch(() => null)
+                ]);
+
+                if (!engRes.ok) throw new Error('Not found');
+                const engData = await engRes.json();
+                
+                let engText = "";
+                let hadithnumber = inputVal;
+                
+                if (engData.hadiths && engData.hadiths.length > 0) {
+                    engText = engData.hadiths[0].text;
+                    hadithnumber = engData.hadiths[0].hadithnumber || inputVal;
+                } else if (engData.text) {
+                    engText = engData.text;
+                }
+
+                let araText = "";
+                if (araRes && araRes.ok) {
+                    const araData = await araRes.json();
+                    if (araData.hadiths && araData.hadiths.length > 0) {
+                        araText = araData.hadiths[0].text;
+                    } else if (araData.text) {
+                        araText = araData.text;
+                    }
+                }
+
+                if (!engText) {
+                    throw new Error('Empty text');
+                }
+
+                container.innerHTML = `
+                    <div class="data-card">
+                        ${araText ? `<div class="arabic-text">${araText}</div>` : ''}
+                        <div class="translation" style="font-size: 1rem; color: #fff; margin-bottom: 16px;">${engText}</div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <span class="dalil-tag"><i class="fa-solid fa-book"></i> ${collection.toUpperCase()}</span>
+                            <span class="dalil-tag"><i class="fa-solid fa-hashtag"></i> #${hadithnumber}</span>
+                            <span class="dalil-tag" style="background: rgba(34, 197, 94, 0.15); color: #22c55e;"><i class="fa-solid fa-check-circle"></i> Sahih</span>
+                        </div>
+                    </div>
+                `;
+            } catch (err) {
+                container.innerHTML = `<div class="data-card" style="color: #ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Hadith number ${inputVal} for ${collection.toUpperCase()} could not be loaded. Try another number (e.g. 1-100).</div>`;
+            }
+        }
+
+        function checkAdhanPermissionState() {
+            const isEnabled = localStorage.getItem('adhan_enabled') === 'true';
+            const btn = document.getElementById('adhan-perm-btn');
+            if (isEnabled) {
+                btn.innerText = "Enabled";
+                btn.style.background = "#22c55e";
+            } else {
+                btn.innerText = "Enable";
+                btn.style.background = "var(--accent-color)";
+            }
+        }
+
+        function toggleAdhanPermission() {
+            const currentState = localStorage.getItem('adhan_enabled') === 'true';
+            localStorage.setItem('adhan_enabled', !currentState);
+            checkAdhanPermissionState();
+        }
+
+        function openReciterModal() {
+            document.getElementById('reciter-modal').classList.add('active');
+        }
+
+        function closeReciterModal() {
+            document.getElementById('reciter-modal').classList.remove('active');
+        }
+
+        async function initReciters() {
+            try {
+                const res = await fetch('https://api.alquran.cloud/v1/edition?format=audio&type=versebyverse');
+                const data = await res.json();
+                reciterDataList = data.data;
+                renderReciterModalList(reciterDataList);
+            } catch (err) { console.error(err); }
+        }
+
+        function renderReciterModalList(reciters) {
+            const container = document.getElementById('reciter-modal-list');
+            container.innerHTML = '';
+            reciters.forEach(reciter => {
+                const isSelected = reciter.identifier === selectedReciterId;
+                const item = document.createElement('div');
+                item.className = `reciter-item ${isSelected ? 'selected' : ''}`;
+                item.onclick = () => selectReciter(reciter);
+                item.innerHTML = `
+                    <div class="reciter-card-info">
+                        <div class="reciter-avatar">${reciter.name.slice(0, 2).toUpperCase()}</div>
+                        <div>
+                            <div class="reciter-name-display">${reciter.name}</div>
+                            <div class="reciter-sub-display">${reciter.englishName}</div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function filterReciterList() {
+            const query = document.getElementById('reciter-search-input').value.toLowerCase();
+            const filtered = reciterDataList.filter(r => r.name.toLowerCase().includes(query) || r.englishName.toLowerCase().includes(query));
+            renderReciterModalList(filtered);
+        }
+
+        function selectReciter(reciter) {
+            selectedReciterId = reciter.identifier;
+            document.getElementById('active-reciter-name').innerText = reciter.name;
+            document.getElementById('active-reciter-sub').innerText = reciter.englishName;
+            renderReciterModalList(reciterDataList);
+            closeReciterModal();
+            loadSurah();
+        }
+
+        async function initSurahList() {
+            try {
+                const res = await fetch('https://api.alquran.cloud/v1/surah');
+                const data = await res.json();
+                const select = document.getElementById('surah-select');
+                data.data.forEach(surah => {
+                    let option = document.createElement('option');
+                    option.value = surah.number;
+                    option.innerText = `${surah.number}. ${surah.englishName} (${surah.name})`;
+                    select.appendChild(option);
+                });
+            } catch (err) { console.error(err); }
+        }
+
+        async function loadSurah() {
+            const surahNum = document.getElementById('surah-select').value || 1;
+            const container = document.getElementById('quran-container');
+            container.innerHTML = '<div class="data-card">Loading Surah...</div>';
+
+            try {
+                const [textRes, audioRes] = await Promise.all([
+                    fetch(`https://api.alquran.cloud/v1/surah/${surahNum}/editions/quran-uthmani,en.sahih`),
+                    fetch(`https://api.alquran.cloud/v1/surah/${surahNum}/${selectedReciterId}`)
+                ]);
+
+                const textData = await textRes.json();
+                const audioData = await audioRes.json();
+
+                const arabic = textData.data[0].ayahs;
+                const translation = textData.data[1].ayahs;
+                const audio = audioData.data ? audioData.data.ayahs : [];
+
+                container.innerHTML = '';
+                arabic.forEach((ayah, idx) => {
+                    const card = document.createElement('div');
+                    card.className = 'data-card';
+                    const audioUrl = audio[idx] ? audio[idx].audio : '';
+                    card.innerHTML = `
+                        <div class="arabic-text">${ayah.text}</div>
+                        <div class="translation">${translation[idx].text}</div>
+                        ${audioUrl ? `<audio controls src="${audioUrl}"></audio>` : ''}
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (err) {
+                container.innerHTML = '<div class="data-card">Failed to load Surah.</div>';
+            }
+        }
+
+        const duaData = {
+            morning: [{ arabic: "أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ", translation: "We have entered the morning...", dalil: "Sahih Muslim" }],
+            evening: [{ arabic: "أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ", translation: "We have reached the evening...", dalil: "Sahih Muslim" }],
+            sick: [{ arabic: "أَذْهِبِ الْبَاسَ رَبَّ النَّاسِ", translation: "Remove the suffering...", dalil: "Sahih al-Bukhari" }],
+            travel: [{ arabic: "سُبْحَانَ الَّذِي سَخَّرَ لَنَا هَذَا", translation: "Glory to Him Who has subjected this...", dalil: "Quran 43:13-14" }]
+        };
+
+        function filterDua(category) {
+            document.querySelectorAll('.dua-category-btn').forEach(btn => btn.classList.remove('active'));
+            if(window.event && window.event.target) window.event.target.classList.add('active');
+            const container = document.getElementById('dua-list');
+            container.innerHTML = '';
+            duaData[category].forEach(dua => {
+                const card = document.createElement('div');
+                card.className = 'data-card';
+                card.innerHTML = `<div class="arabic-text">${dua.arabic}</div><div class="translation">${dua.translation}</div><div class="dalil-tag">${dua.dalil}</div>`;
+                container.appendChild(card);
+            });
+        }
+
+        async function fetchCityData() {
+            const city = document.getElementById('city-input').value.trim();
+            if (!city) return;
+            try {
+                const pRes = await fetch(`https://api.aladhan.com/v1/timingsByCity?city=${city}&country=&method=2`);
+                const pData = await pRes.json();
+                const timings = pData.data.timings;
+                document.getElementById('prayer-list').innerHTML = `
+                    <div class="prayer-row"><span>Fajr</span><strong>${timings.Fajr}</strong></div>
+                    <div class="prayer-row"><span>Dhuhr</span><strong>${timings.Dhuhr}</strong></div>
+                    <div class="prayer-row"><span>Asr</span><strong>${timings.Asr}</strong></div>
+                    <div class="prayer-row"><span>Maghrib</span><strong>${timings.Maghrib}</strong></div>
+                    <div class="prayer-row"><span>Isha</span><strong>${timings.Isha}</strong></div>
+                `;
+                const meta = pData.data.meta;
+                const qRes = await fetch(`https://api.aladhan.com/v1/qibla/${meta.latitude}/${meta.longitude}`);
+                const qData = await qRes.json();
+                rawQiblaBearing = Math.round(qData.data.direction);
+                document.getElementById('qibla-degree').innerText = `${rawQiblaBearing}°`;
+                document.getElementById('compass-pointer').style.transform = `rotate(${rawQiblaBearing}deg)`;
+            } catch(e) { alert('Error loading city timings'); }
+        }
+
+        Promise.all([initReciters(), initSurahList()]).then(() => {
+            loadSurah();
+            fetchHadithData();
+            checkAdhanPermissionState();
+        });
+        filterDua('morning');
+        renderNavBar();
+    </script>
+</body>
+</html>
